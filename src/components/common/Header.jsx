@@ -1,5 +1,5 @@
 // ==================== src/components/common/Header.jsx ====================
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, LogOut, Settings, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 const Header = ({ userName }) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
