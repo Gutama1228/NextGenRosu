@@ -5,13 +5,12 @@
   "author": "Your Name <your@email.com>",
   "license": "MIT",
   "private": true,
-  "homepage": "https://your-username.github.io/roblox-ai-studio",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/roblox-ai-studio.git"
+    "url": "https://github.com/Gutama1228/NextGenAirosu.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/roblox-ai-studio/issues"
+    "url": "https://github.com/Gutama1228/NextGenAirosu/issues"
   },
   "keywords": [
     "roblox",
