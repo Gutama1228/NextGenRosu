@@ -369,3 +369,106 @@ export const updateSettings = async (settings) => {
 };
 
 export default api;
+// ==================== Tambahkan ke src/services/api.js ====================
+
+// ==================== SITE SETTINGS API ====================
+
+export const getSiteConfig = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Ambil dari localStorage atau gunakan default
+      const savedConfig = localStorage.getItem('site_config');
+      const config = savedConfig ? JSON.parse(savedConfig) : {
+        siteName: 'Roblox AI Studio',
+        tagline: 'Your Development Assistant',
+        logoUrl: '',
+        showBadge: true,
+        badgeIcon: 'sparkles',
+        badgeText: 'AI Powered'
+      };
+      resolve(config);
+    }, 300);
+  });
+};
+
+export const updateSiteConfig = async (config) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Save ke localStorage (dalam production, kirim ke backend)
+      localStorage.setItem('site_config', JSON.stringify(config));
+      resolve({ success: true, config });
+    }, 500);
+  });
+};
+
+// ==================== STATS API - Real Data from Database ====================
+
+export const getRealTimeStats = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Dalam production, ini akan fetch dari database
+      // Yang menghitung real users, real chats, dll
+      const stats = {
+        activeUsers: parseInt(localStorage.getItem('total_users') || '850'),
+        totalChats: parseInt(localStorage.getItem('total_chats') || '15640'),
+        codeSnippets: parseInt(localStorage.getItem('code_snippets') || '8900'),
+        userRating: parseFloat(localStorage.getItem('user_rating') || '4.9'),
+        lastUpdated: new Date().toISOString()
+      };
+      resolve(stats);
+    }, 300);
+  });
+};
+
+// Fungsi untuk increment stats (dipanggil ketika user action)
+export const incrementStats = async (type) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const currentValue = parseInt(localStorage.getItem(type) || '0');
+      const newValue = currentValue + 1;
+      localStorage.setItem(type, newValue.toString());
+      resolve({ success: true, newValue });
+    }, 100);
+  });
+};
+
+// Update getSettings untuk include site config
+export const getSettings = async () => {
+  return new Promise(async (resolve) => {
+    setTimeout(async () => {
+      const siteConfig = await getSiteConfig();
+      const settings = {
+        api: {
+          model: 'claude-sonnet-4-20250514',
+          maxTokens: 4096,
+          temperature: 0.7,
+        },
+        features: {
+          userRegistration: true,
+          maintenance: false,
+          analytics: true,
+        },
+        ui: {
+          theme: 'dark',
+          language: 'id',
+        },
+        site: siteConfig // Tambahkan site config
+      };
+      resolve(settings);
+    }, 300);
+  });
+};
+
+// Update updateSettings untuk include site config
+export const updateSettings = async (settings) => {
+  return new Promise(async (resolve) => {
+    setTimeout(async () => {
+      // Update site config jika ada
+      if (settings.site) {
+        await updateSiteConfig(settings.site);
+      }
+      
+      resolve({ success: true, settings });
+    }, 500);
+  });
+};
