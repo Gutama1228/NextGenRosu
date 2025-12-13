@@ -40,10 +40,8 @@ api.interceptors.response.use(
 // ==================== AUTH API ====================
 
 export const login = async (email, password) => {
-  // Simulate API call with demo credentials
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      // Check demo credentials
       const isAdmin = email === DEMO_CREDENTIALS.ADMIN.email && 
                      password === DEMO_CREDENTIALS.ADMIN.password;
       const isUser = email === DEMO_CREDENTIALS.USER.email && 
@@ -59,6 +57,10 @@ export const login = async (email, password) => {
           avatar: null,
           createdAt: new Date().toISOString(),
         };
+        
+        // Track login untuk stats
+        trackUserActivity('login');
+        
         resolve(user);
       } else {
         reject(new Error('Email atau password salah'));
@@ -68,7 +70,6 @@ export const login = async (email, password) => {
 };
 
 export const register = async (name, email, password) => {
-  // Simulate API call
   return new Promise((resolve) => {
     setTimeout(() => {
       const user = {
@@ -80,6 +81,10 @@ export const register = async (name, email, password) => {
         avatar: null,
         createdAt: new Date().toISOString(),
       };
+      
+      // Increment total users
+      trackUserActivity('register');
+      
       resolve(user);
     }, 1000);
   });
@@ -98,7 +103,6 @@ export const logout = async () => {
 // ==================== USER API ====================
 
 export const getUsers = async () => {
-  // Simulate API call with mock data
   return new Promise((resolve) => {
     setTimeout(() => {
       const users = [
@@ -184,11 +188,14 @@ export const deleteUser = async (id) => {
 export const getAnalytics = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Get real stats from tracking
+      const stats = getRealTimeStatsSync();
+      
       const analytics = {
         overview: {
-          totalUsers: 1250,
-          activeUsers: 850,
-          totalChats: 15640,
+          totalUsers: stats.totalUsers,
+          activeUsers: stats.activeUsers,
+          totalChats: stats.totalChats,
           avgResponseTime: 1.2,
         },
         userGrowth: [
@@ -196,7 +203,7 @@ export const getAnalytics = async () => {
           { month: 'Feb', users: 600, chats: 3200 },
           { month: 'Mar', users: 800, chats: 4100 },
           { month: 'Apr', users: 1000, chats: 5200 },
-          { month: 'May', users: 1250, chats: 6800 },
+          { month: 'May', users: stats.totalUsers, chats: stats.totalChats },
         ],
         categoryUsage: [
           { name: 'Coding', value: 4200, color: '#3b82f6' },
@@ -293,12 +300,69 @@ export const getCategoryStats = async () => {
   });
 };
 
+// ==================== REAL-TIME STATS TRACKING ====================
+
+// Initialize stats if not exist
+const initializeStats = () => {
+  if (!localStorage.getItem('stats_initialized')) {
+    localStorage.setItem('total_users', '850');
+    localStorage.setItem('active_users', '850');
+    localStorage.setItem('total_chats', '15640');
+    localStorage.setItem('code_snippets', '9384');
+    localStorage.setItem('user_rating', '4.9');
+    localStorage.setItem('stats_initialized', 'true');
+  }
+};
+
+initializeStats();
+
+// Get real-time stats synchronously
+const getRealTimeStatsSync = () => {
+  return {
+    totalUsers: parseInt(localStorage.getItem('total_users') || '850'),
+    activeUsers: parseInt(localStorage.getItem('active_users') || '850'),
+    totalChats: parseInt(localStorage.getItem('total_chats') || '15640'),
+    codeSnippets: parseInt(localStorage.getItem('code_snippets') || '9384'),
+    userRating: parseFloat(localStorage.getItem('user_rating') || '4.9'),
+  };
+};
+
+// Track user activity
+const trackUserActivity = (activityType) => {
+  switch(activityType) {
+    case 'register':
+      const totalUsers = parseInt(localStorage.getItem('total_users') || '0');
+      localStorage.setItem('total_users', (totalUsers + 1).toString());
+      localStorage.setItem('active_users', (totalUsers + 1).toString());
+      break;
+    case 'login':
+      const activeUsers = parseInt(localStorage.getItem('active_users') || '0');
+      localStorage.setItem('active_users', (activeUsers + 1).toString());
+      break;
+    case 'chat':
+      const totalChats = parseInt(localStorage.getItem('total_chats') || '0');
+      localStorage.setItem('total_chats', (totalChats + 1).toString());
+      break;
+    case 'code':
+      const codeSnippets = parseInt(localStorage.getItem('code_snippets') || '0');
+      localStorage.setItem('code_snippets', (codeSnippets + 1).toString());
+      break;
+    default:
+      break;
+  }
+};
+
+// Export tracking function
+export const trackActivity = trackUserActivity;
+
 // ==================== CHAT API ====================
 
 export const sendChatMessage = async (message, category) => {
-  // This will be handled by anthropic.js
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Track chat activity
+      trackUserActivity('chat');
+      
       resolve({
         success: true,
         messageId: Date.now(),
@@ -339,104 +403,13 @@ export const clearChatHistory = async () => {
 export const getSettings = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const settings = {
-        api: {
-          model: 'claude-sonnet-4-20250514',
-          maxTokens: 4096,
-          temperature: 0.7,
-        },
-        features: {
-          userRegistration: true,
-          maintenance: false,
-          analytics: true,
-        },
-        ui: {
-          theme: 'dark',
-          language: 'id',
-        },
-      };
-      resolve(settings);
-    }, 300);
-  });
-};
-
-export const updateSettings = async (settings) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ success: true, settings });
-    }, 500);
-  });
-};
-
-export default api;
-// ==================== Tambahkan ke src/services/api.js ====================
-
-// ==================== SITE SETTINGS API ====================
-
-export const getSiteConfig = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Ambil dari localStorage atau gunakan default
       const savedConfig = localStorage.getItem('site_config');
-      const config = savedConfig ? JSON.parse(savedConfig) : {
+      const siteConfig = savedConfig ? JSON.parse(savedConfig) : {
         siteName: 'Roblox AI Studio',
         tagline: 'Your Development Assistant',
         logoUrl: '',
-        showBadge: true,
-        badgeIcon: 'sparkles',
-        badgeText: 'AI Powered'
       };
-      resolve(config);
-    }, 300);
-  });
-};
-
-export const updateSiteConfig = async (config) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Save ke localStorage (dalam production, kirim ke backend)
-      localStorage.setItem('site_config', JSON.stringify(config));
-      resolve({ success: true, config });
-    }, 500);
-  });
-};
-
-// ==================== STATS API - Real Data from Database ====================
-
-export const getRealTimeStats = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Dalam production, ini akan fetch dari database
-      // Yang menghitung real users, real chats, dll
-      const stats = {
-        activeUsers: parseInt(localStorage.getItem('total_users') || '850'),
-        totalChats: parseInt(localStorage.getItem('total_chats') || '15640'),
-        codeSnippets: parseInt(localStorage.getItem('code_snippets') || '8900'),
-        userRating: parseFloat(localStorage.getItem('user_rating') || '4.9'),
-        lastUpdated: new Date().toISOString()
-      };
-      resolve(stats);
-    }, 300);
-  });
-};
-
-// Fungsi untuk increment stats (dipanggil ketika user action)
-export const incrementStats = async (type) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const currentValue = parseInt(localStorage.getItem(type) || '0');
-      const newValue = currentValue + 1;
-      localStorage.setItem(type, newValue.toString());
-      resolve({ success: true, newValue });
-    }, 100);
-  });
-};
-
-// Update getSettings untuk include site config
-export const getSettings = async () => {
-  return new Promise(async (resolve) => {
-    setTimeout(async () => {
-      const siteConfig = await getSiteConfig();
+      
       const settings = {
         api: {
           model: 'claude-sonnet-4-20250514',
@@ -452,23 +425,24 @@ export const getSettings = async () => {
           theme: 'dark',
           language: 'id',
         },
-        site: siteConfig // Tambahkan site config
+        site: siteConfig,
       };
       resolve(settings);
     }, 300);
   });
 };
 
-// Update updateSettings untuk include site config
 export const updateSettings = async (settings) => {
-  return new Promise(async (resolve) => {
-    setTimeout(async () => {
-      // Update site config jika ada
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Update site config if provided
       if (settings.site) {
-        await updateSiteConfig(settings.site);
+        localStorage.setItem('site_config', JSON.stringify(settings.site));
       }
       
       resolve({ success: true, settings });
     }, 500);
   });
 };
+
+export default api;
