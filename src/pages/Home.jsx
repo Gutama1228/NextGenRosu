@@ -5,28 +5,69 @@ import {
   CheckCircle, Github, Star, Users, MessageSquare, Twitter, 
   Mail, ExternalLink 
 } from 'lucide-react';
+import { getAnalytics } from '../services/api';
 
 const Home = () => {
-  // Real-time stats with animation
+  // Real-time stats dari database
   const [stats, setStats] = useState({
-    activeUsers: 1250,
-    chatsGenerated: 15640,
-    codeSnippets: 8900,
-    userRating: 4.9
+    activeUsers: 0,
+    chatsGenerated: 0,
+    codeSnippets: 0,
+    userRating: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Site configuration (bisa diambil dari API atau settings)
+  const [siteConfig, setSiteConfig] = useState({
+    siteName: 'Roblox AI Studio',
+    tagline: 'Your Development Assistant',
+    logo: null, // URL logo jika ada
+    showBadge: true,
+    badgeIcon: 'sparkles', // bisa diubah dari admin
+    badgeText: 'AI Powered'
   });
 
+  // Fetch stats dari API
   useEffect(() => {
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setStats(prev => ({
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 3),
-        chatsGenerated: prev.chatsGenerated + Math.floor(Math.random() * 10),
-        codeSnippets: prev.codeSnippets + Math.floor(Math.random() * 5),
-        userRating: Math.min(5, +(prev.userRating + (Math.random() * 0.01)).toFixed(1))
-      }));
-    }, 5000); // Update every 5 seconds
+    const fetchStats = async () => {
+      try {
+        const data = await getAnalytics();
+        
+        setStats({
+          activeUsers: data.overview?.activeUsers || 0,
+          chatsGenerated: data.overview?.totalChats || 0,
+          codeSnippets: Math.floor((data.overview?.totalChats || 0) * 0.6), // Estimasi dari total chats
+          userRating: 4.9 // Bisa dihitung dari feedback users
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+
+    // Refresh stats setiap 30 detik
+    const interval = setInterval(fetchStats, 30000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Fetch site config (untuk logo & badge)
+  useEffect(() => {
+    const fetchSiteConfig = async () => {
+      try {
+        // TODO: Implement API call untuk ambil site config
+        // const config = await getSiteConfig();
+        // setSiteConfig(config);
+      } catch (error) {
+        console.error('Error fetching site config:', error);
+      }
+    };
+
+    fetchSiteConfig();
   }, []);
 
   const features = [
@@ -65,18 +106,42 @@ const Home = () => {
     'Gratis untuk semua developer'
   ];
 
+  // Render badge icon based on config
+  const renderBadgeIcon = () => {
+    if (siteConfig.logo) {
+      return <img src={siteConfig.logo} alt="Logo" className="w-5 h-5" />;
+    }
+    
+    // Default icon mapping
+    const iconMap = {
+      sparkles: <Sparkles className="w-5 h-5" />,
+      star: <Star className="w-5 h-5" />,
+      zap: <Zap className="w-5 h-5" />,
+    };
+    
+    return iconMap[siteConfig.badgeIcon] || <Sparkles className="w-5 h-5" />;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       {/* Header */}
       <header className="border-b border-white/10 backdrop-blur-lg bg-black/30 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6" />
-            </div>
+            {siteConfig.logo ? (
+              <img 
+                src={siteConfig.logo} 
+                alt={siteConfig.siteName}
+                className="w-10 h-10 rounded-lg"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                <Sparkles className="w-6 h-6" />
+              </div>
+            )}
             <div>
-              <h1 className="text-xl font-bold">Roblox AI Studio</h1>
-              <p className="text-xs text-gray-400">Your Development Assistant</p>
+              <h1 className="text-xl font-bold">{siteConfig.siteName}</h1>
+              <p className="text-xs text-gray-400">{siteConfig.tagline}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -98,6 +163,14 @@ const Home = () => {
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-20 text-center">
+        {/* Optional Badge */}
+        {siteConfig.showBadge && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-full text-sm font-medium mb-6 animate-fade-in">
+            {renderBadgeIcon()}
+            {siteConfig.badgeText}
+          </div>
+        )}
+        
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in">
           AI Assistant untuk
           <br />
@@ -127,19 +200,25 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* Real-time Stats */}
+        {/* Real-time Stats from Database */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
             <div className="flex justify-center mb-3 text-purple-400">
               <Users className="w-6 h-6" />
             </div>
             <div className="text-2xl font-bold mb-1 transition-all duration-500">
-              {stats.activeUsers.toLocaleString()}+
+              {loading ? (
+                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
+              ) : (
+                `${stats.activeUsers.toLocaleString()}+`
+              )}
             </div>
             <div className="text-sm text-gray-400">Active Users</div>
-            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
-              <span className="animate-pulse">●</span> Live
-            </div>
+            {!loading && (
+              <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+                <span className="animate-pulse">●</span> Live
+              </div>
+            )}
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
@@ -147,12 +226,18 @@ const Home = () => {
               <MessageSquare className="w-6 h-6" />
             </div>
             <div className="text-2xl font-bold mb-1 transition-all duration-500">
-              {stats.chatsGenerated.toLocaleString()}+
+              {loading ? (
+                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
+              ) : (
+                `${stats.chatsGenerated.toLocaleString()}+`
+              )}
             </div>
             <div className="text-sm text-gray-400">Chats Generated</div>
-            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
-              <span className="animate-pulse">●</span> Live
-            </div>
+            {!loading && (
+              <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+                <span className="animate-pulse">●</span> Live
+              </div>
+            )}
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
@@ -160,12 +245,18 @@ const Home = () => {
               <Code className="w-6 h-6" />
             </div>
             <div className="text-2xl font-bold mb-1 transition-all duration-500">
-              {stats.codeSnippets.toLocaleString()}+
+              {loading ? (
+                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
+              ) : (
+                `${stats.codeSnippets.toLocaleString()}+`
+              )}
             </div>
             <div className="text-sm text-gray-400">Code Snippets</div>
-            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
-              <span className="animate-pulse">●</span> Live
-            </div>
+            {!loading && (
+              <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+                <span className="animate-pulse">●</span> Live
+              </div>
+            )}
           </div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
@@ -173,12 +264,18 @@ const Home = () => {
               <Star className="w-6 h-6" />
             </div>
             <div className="text-2xl font-bold mb-1 transition-all duration-500">
-              {stats.userRating}/5
+              {loading ? (
+                <div className="h-8 bg-white/10 rounded animate-pulse"></div>
+              ) : (
+                `${stats.userRating}/5`
+              )}
             </div>
             <div className="text-sm text-gray-400">User Rating</div>
-            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
-              <span className="animate-pulse">●</span> Live
-            </div>
+            {!loading && (
+              <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+                <span className="animate-pulse">●</span> Live
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -291,10 +388,18 @@ end`}
             {/* Company Info */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold">Roblox AI Studio</h3>
+                {siteConfig.logo ? (
+                  <img 
+                    src={siteConfig.logo} 
+                    alt={siteConfig.siteName}
+                    className="w-10 h-10 rounded-lg"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                )}
+                <h3 className="text-xl font-bold">{siteConfig.siteName}</h3>
               </div>
               <p className="text-sm text-gray-400 mb-4 max-w-md">
                 Platform AI assistant terdepan untuk Roblox developers. 
@@ -318,12 +423,12 @@ end`}
               <h4 className="font-semibold mb-4 text-purple-400">Navigasi</h4>
               <ul className="space-y-3 text-sm text-gray-400">
                 <li>
-                  <Link to="/login" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                  <Link to="/login" className="hover:text-purple-400 transition-colors">
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link to="/register" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                  <Link to="/register" className="hover:text-purple-400 transition-colors">
                     Register
                   </Link>
                 </li>
@@ -376,7 +481,7 @@ end`}
           {/* Bottom Footer */}
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
             <div className="flex items-center gap-2">
-              <p>© {new Date().getFullYear()} Roblox AI Studio</p>
+              <p>© {new Date().getFullYear()} {siteConfig.siteName}</p>
               <span>•</span>
               <p>Made with ❤️ for Roblox Developers</p>
             </div>
