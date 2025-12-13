@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Sparkles, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const Register = () => {
@@ -8,8 +8,6 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -19,29 +17,13 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    // Validation
-    if (!name.trim()) {
-      setError('Nama wajib diisi');
-      return;
-    }
-
-    if (name.length < 3) {
-      setError('Nama minimal 3 karakter');
-      return;
-    }
-
-    if (!email.trim()) {
-      setError('Email wajib diisi');
+    if (password !== confirmPassword) {
+      setError('Password tidak cocok');
       return;
     }
 
     if (password.length < 8) {
       setError('Password minimal 8 karakter');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Password tidak cocok');
       return;
     }
 
@@ -63,7 +45,7 @@ const Register = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -73,7 +55,7 @@ const Register = () => {
         </div>
 
         {/* Register Form */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 shadow-2xl">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
@@ -85,7 +67,7 @@ const Register = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                   required
                 />
               </div>
@@ -101,7 +83,7 @@ const Register = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                   required
                 />
               </div>
@@ -113,22 +95,14 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
               </div>
-              <p className="text-xs text-gray-400 mt-1">Minimal 8 karakter</p>
             </div>
 
             {/* Confirm Password */}
@@ -137,26 +111,19 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white placeholder-gray-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-sm text-red-400 animate-fade-in">
+              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-sm text-red-400">
                 {error}
               </div>
             )}
@@ -165,7 +132,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg py-3 font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 active:scale-95"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg py-3 font-semibold transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -173,7 +140,7 @@ const Register = () => {
                   <span>Memproses...</span>
                 </>
               ) : (
-                <span>Daftar Sekarang</span>
+                <span>Daftar</span>
               )}
             </button>
           </form>
@@ -181,16 +148,11 @@ const Register = () => {
           {/* Login Link */}
           <p className="text-center mt-6 text-sm text-gray-400">
             Sudah punya akun?{' '}
-            <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+            <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">
               Masuk di sini
             </Link>
           </p>
         </div>
-
-        {/* Info */}
-        <p className="text-center mt-6 text-xs text-gray-500">
-          Dengan mendaftar, Anda menyetujui Terms of Service dan Privacy Policy kami
-        </p>
       </div>
     </div>
   );
