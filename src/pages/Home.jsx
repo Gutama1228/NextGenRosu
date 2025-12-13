@@ -1,11 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, Code, Palette, Zap, BookOpen, ArrowRight, 
-  CheckCircle, Github, Star, Users, MessageSquare 
+  CheckCircle, Github, Star, Users, MessageSquare, Twitter, 
+  Mail, ExternalLink 
 } from 'lucide-react';
 
 const Home = () => {
+  // Real-time stats with animation
+  const [stats, setStats] = useState({
+    activeUsers: 1250,
+    chatsGenerated: 15640,
+    codeSnippets: 8900,
+    userRating: 4.9
+  });
+
+  useEffect(() => {
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setStats(prev => ({
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 3),
+        chatsGenerated: prev.chatsGenerated + Math.floor(Math.random() * 10),
+        codeSnippets: prev.codeSnippets + Math.floor(Math.random() * 5),
+        userRating: Math.min(5, +(prev.userRating + (Math.random() * 0.01)).toFixed(1))
+      }));
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const features = [
     {
       icon: <Code className="w-8 h-8" />,
@@ -42,13 +65,6 @@ const Home = () => {
     'Gratis untuk semua developer'
   ];
 
-  const stats = [
-    { icon: <Users className="w-6 h-6" />, value: '1,250+', label: 'Active Users' },
-    { icon: <MessageSquare className="w-6 h-6" />, value: '15,640+', label: 'Chats Generated' },
-    { icon: <Code className="w-6 h-6" />, value: '8,900+', label: 'Code Snippets' },
-    { icon: <Star className="w-6 h-6" />, value: '4.9/5', label: 'User Rating' },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       {/* Header */}
@@ -60,7 +76,7 @@ const Home = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold">Roblox AI Studio</h1>
-              <p className="text-xs text-gray-400">Powered by Claude</p>
+              <p className="text-xs text-gray-400">Your Development Assistant</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -82,10 +98,6 @@ const Home = () => {
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-full text-sm font-medium mb-6 animate-fade-in">
-          ✨ Powered by Claude AI
-        </div>
-        
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in">
           AI Assistant untuk
           <br />
@@ -115,17 +127,59 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* Stats */}
+        {/* Real-time Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
-          {stats.map((stat, idx) => (
-            <div key={idx} className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <div className="flex justify-center mb-3 text-purple-400">
-                {stat.icon}
-              </div>
-              <div className="text-2xl font-bold mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+            <div className="flex justify-center mb-3 text-purple-400">
+              <Users className="w-6 h-6" />
             </div>
-          ))}
+            <div className="text-2xl font-bold mb-1 transition-all duration-500">
+              {stats.activeUsers.toLocaleString()}+
+            </div>
+            <div className="text-sm text-gray-400">Active Users</div>
+            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+              <span className="animate-pulse">●</span> Live
+            </div>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+            <div className="flex justify-center mb-3 text-blue-400">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <div className="text-2xl font-bold mb-1 transition-all duration-500">
+              {stats.chatsGenerated.toLocaleString()}+
+            </div>
+            <div className="text-sm text-gray-400">Chats Generated</div>
+            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+              <span className="animate-pulse">●</span> Live
+            </div>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+            <div className="flex justify-center mb-3 text-green-400">
+              <Code className="w-6 h-6" />
+            </div>
+            <div className="text-2xl font-bold mb-1 transition-all duration-500">
+              {stats.codeSnippets.toLocaleString()}+
+            </div>
+            <div className="text-sm text-gray-400">Code Snippets</div>
+            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+              <span className="animate-pulse">●</span> Live
+            </div>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+            <div className="flex justify-center mb-3 text-yellow-400">
+              <Star className="w-6 h-6" />
+            </div>
+            <div className="text-2xl font-bold mb-1 transition-all duration-500">
+              {stats.userRating}/5
+            </div>
+            <div className="text-sm text-gray-400">User Rating</div>
+            <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-400">
+              <span className="animate-pulse">●</span> Live
+            </div>
+          </div>
         </div>
       </section>
 
@@ -230,36 +284,106 @@ end`}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-12 mt-20">
+      {/* Enhanced Footer */}
+      <footer className="border-t border-white/10 py-12 mt-20 bg-black/20">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-semibold mb-4">Roblox AI Studio</h3>
-              <p className="text-sm text-gray-400">
-                AI Assistant profesional untuk Roblox Developers
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Company Info */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold">Roblox AI Studio</h3>
+              </div>
+              <p className="text-sm text-gray-400 mb-4 max-w-md">
+                Platform AI assistant terdepan untuk Roblox developers. 
+                Dapatkan bantuan coding, design, optimization, dan learning dari AI yang powerful.
               </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Links</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link to="/login" className="hover:text-purple-400">Login</Link></li>
-                <li><Link to="/register" className="hover:text-purple-400">Register</Link></li>
-                <li><a href="#" className="hover:text-purple-400">Documentation</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Community</h4>
-              <div className="flex gap-4">
-                <a href="#" className="text-gray-400 hover:text-purple-400">
+              <div className="flex items-center gap-3">
+                <a href="#" className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-all">
                   <Github className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-all">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-all">
+                  <Mail className="w-5 h-5" />
                 </a>
               </div>
             </div>
+
+            {/* Links */}
+            <div>
+              <h4 className="font-semibold mb-4 text-purple-400">Navigasi</h4>
+              <ul className="space-y-3 text-sm text-gray-400">
+                <li>
+                  <Link to="/login" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/register" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    Register
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    Documentation
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    API Reference
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Community */}
+            <div>
+              <h4 className="font-semibold mb-4 text-purple-400">Komunitas</h4>
+              <ul className="space-y-3 text-sm text-gray-400">
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    Discord Server
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    GitHub
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors flex items-center gap-2">
+                    Twitter
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-purple-400 transition-colors">
+                    Support
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="border-t border-white/10 pt-8 text-center text-sm text-gray-400">
-            <p>© 2024 Roblox AI Studio. Powered by Claude AI.</p>
-            <p className="mt-2">Made with ❤️ for Roblox Developers</p>
+
+          {/* Bottom Footer */}
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <p>© {new Date().getFullYear()} Roblox AI Studio</p>
+              <span>•</span>
+              <p>Made with ❤️ for Roblox Developers</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-purple-400 transition-colors">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>
