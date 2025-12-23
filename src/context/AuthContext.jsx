@@ -4,6 +4,9 @@ import { login as apiLogin, register as apiRegister, logout as apiLogout } from 
 // Create context
 const AuthContext = createContext(null);
 
+// ✅ TAMBAHKAN INI - Export AuthContext sebagai named export
+export { AuthContext };
+
 // Export useAuth hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
