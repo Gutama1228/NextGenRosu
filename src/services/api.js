@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DEMO_CREDENTIALS, API_ENDPOINTS } from '../utils/constants';
+import { trackActivity } from './tracking';
 
 // Create axios instance
 const api = axios.create({
@@ -58,9 +59,6 @@ export const login = async (email, password) => {
           createdAt: new Date().toISOString(),
         };
         
-        // Track login untuk stats
-        trackUserActivity('login');
-        
         resolve(user);
       } else {
         reject(new Error('Email atau password salah'));
@@ -81,9 +79,6 @@ export const register = async (name, email, password) => {
         avatar: null,
         createdAt: new Date().toISOString(),
       };
-      
-      // Increment total users
-      trackUserActivity('register');
       
       resolve(user);
     }, 1000);
@@ -188,22 +183,23 @@ export const deleteUser = async (id) => {
 export const getAnalytics = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Get real stats from tracking
-      const stats = getRealTimeStatsSync();
+      // ✅ GET REAL STATS from tracking.js
+      const { getStats } = require('./tracking');
+      const realStats = getStats();
       
       const analytics = {
         overview: {
-          totalUsers: stats.totalUsers,
-          activeUsers: stats.activeUsers,
-          totalChats: stats.totalChats,
+          totalUsers: realStats.totalUsers,
+          activeUsers: realStats.activeUsers,
+          totalChats: realStats.totalChats,
           avgResponseTime: 1.2,
         },
         userGrowth: [
-          { month: 'Jan', users: 400, chats: 2400 },
-          { month: 'Feb', users: 600, chats: 3200 },
-          { month: 'Mar', users: 800, chats: 4100 },
-          { month: 'Apr', users: 1000, chats: 5200 },
-          { month: 'May', users: stats.totalUsers, chats: stats.totalChats },
+          { month: 'Jan', users: Math.floor(realStats.totalUsers * 0.2), chats: Math.floor(realStats.totalChats * 0.2) },
+          { month: 'Feb', users: Math.floor(realStats.totalUsers * 0.4), chats: Math.floor(realStats.totalChats * 0.4) },
+          { month: 'Mar', users: Math.floor(realStats.totalUsers * 0.6), chats: Math.floor(realStats.totalChats * 0.6) },
+          { month: 'Apr', users: Math.floor(realStats.totalUsers * 0.8), chats: Math.floor(realStats.totalChats * 0.8) },
+          { month: 'May', users: realStats.totalUsers, chats: realStats.totalChats },
         ],
         categoryUsage: [
           { name: 'Coding', value: 4200, color: '#3b82f6' },
@@ -300,69 +296,11 @@ export const getCategoryStats = async () => {
   });
 };
 
-// ==================== REAL-TIME STATS TRACKING ====================
-
-// Initialize stats if not exist
-const initializeStats = () => {
-  if (!localStorage.getItem('stats_initialized')) {
-    localStorage.setItem('total_users', '850');
-    localStorage.setItem('active_users', '850');
-    localStorage.setItem('total_chats', '15640');
-    localStorage.setItem('code_snippets', '9384');
-    localStorage.setItem('user_rating', '4.9');
-    localStorage.setItem('stats_initialized', 'true');
-  }
-};
-
-initializeStats();
-
-// Get real-time stats synchronously
-const getRealTimeStatsSync = () => {
-  return {
-    totalUsers: parseInt(localStorage.getItem('total_users') || '850'),
-    activeUsers: parseInt(localStorage.getItem('active_users') || '850'),
-    totalChats: parseInt(localStorage.getItem('total_chats') || '15640'),
-    codeSnippets: parseInt(localStorage.getItem('code_snippets') || '9384'),
-    userRating: parseFloat(localStorage.getItem('user_rating') || '4.9'),
-  };
-};
-
-// Track user activity
-const trackUserActivity = (activityType) => {
-  switch(activityType) {
-    case 'register':
-      const totalUsers = parseInt(localStorage.getItem('total_users') || '0');
-      localStorage.setItem('total_users', (totalUsers + 1).toString());
-      localStorage.setItem('active_users', (totalUsers + 1).toString());
-      break;
-    case 'login':
-      const activeUsers = parseInt(localStorage.getItem('active_users') || '0');
-      localStorage.setItem('active_users', (activeUsers + 1).toString());
-      break;
-    case 'chat':
-      const totalChats = parseInt(localStorage.getItem('total_chats') || '0');
-      localStorage.setItem('total_chats', (totalChats + 1).toString());
-      break;
-    case 'code':
-      const codeSnippets = parseInt(localStorage.getItem('code_snippets') || '0');
-      localStorage.setItem('code_snippets', (codeSnippets + 1).toString());
-      break;
-    default:
-      break;
-  }
-};
-
-// Export tracking function
-export const trackActivity = trackUserActivity;
-
 // ==================== CHAT API ====================
 
 export const sendChatMessage = async (message, category) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Track chat activity
-      trackUserActivity('chat');
-      
       resolve({
         success: true,
         messageId: Date.now(),
